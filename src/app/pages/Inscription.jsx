@@ -1,8 +1,6 @@
 import React, { useState ,  } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
-const URL_FRONT = import.meta.env.VITE_URL_FRONT;
-
+const URL_front = import.meta.env.VITE_URL_FRONT;
 
 
 const Inscription = () => {
@@ -33,7 +31,7 @@ const Inscription = () => {
         };
 
         try {
-                 const response = await fetch(`${URL_FRONT}/api/auth/inscription`, {
+            const response = await fetch(`${URL_FRONT}/api/auth/inscription`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -46,7 +44,7 @@ const Inscription = () => {
 
             if (response.ok) {
                 alert("Inscription réussie ✔️ Vous pouvez maintenant vous connecter.");
-                  navigate('/connexion');
+                  navigte('/connexion');
                 
             } else {
                 alert(result.message || "Erreur lors de l'inscription");
@@ -73,7 +71,7 @@ const Inscription = () => {
                     <input
                         className="border py-1 px-3 border-black"
                         type="text" placeholder="Prénom"
-                         value = {prenom}
+                        value = {prenom}
                         onChange={ (e) => setPrenom(e.target.value)}/>
                 </div>
                 <div className="flex flex-col gap-2 mt-2">
