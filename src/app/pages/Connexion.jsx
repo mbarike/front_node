@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
- import.meta.env.VITE_URL_FRONT;
+const URL_front = import.meta.env.VITE_URL_FRONT;
 
 
 const Connexion = () => {
