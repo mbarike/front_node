@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import axios from "axios";
 
 export default function QuestionForm() {
   const [title, setTitle] = useState("");
@@ -9,13 +9,24 @@ export default function QuestionForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios.post("http://localhost:5000/questions", {
-      title,
-      description,
-      tags: tags.split(","),
-    });
+    try {
+      await axios.post("http://localhost:3000/api/question", {
+        titre: title,                 // ✅ correspond au backend
+        description: description,
+        categorie: tags,              // ✅ on utilise tags comme catégorie
+      });
 
-    alert("Question ajoutée !");
+      alert("Question ajoutée !");
+
+      // reset form
+      setTitle("");
+      setDescription("");
+      setTags("");
+
+    } catch (error) {
+      console.error(error);
+      alert("Erreur lors de l'envoi ❌");
+    }
   };
 
   return (
@@ -31,6 +42,7 @@ export default function QuestionForm() {
           type="text"
           placeholder="Titre de la question"
           className="border p-2 w-full mb-3 rounded"
+          value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
@@ -38,14 +50,16 @@ export default function QuestionForm() {
         <textarea
           placeholder="Décris ton problème..."
           className="border p-2 w-full mb-3 rounded h-32"
+          value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
         {/* Tags */}
         <input
           type="text"
-          placeholder="tags (ex: react,node)"
+          placeholder="categorie (ex: react,node)"
           className="border p-2 w-full mb-4 rounded"
+          value={tags}
           onChange={(e) => setTags(e.target.value)}
         />
 
