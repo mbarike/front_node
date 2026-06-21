@@ -113,13 +113,46 @@ const handleAnswer = async (e) => {
   </h3>
 
   {answers.map((a) => (
-    <div key={a._id} className="border p-3 mb-2 rounded">
-      <p>{a.contenu}</p>
-      <span className="text-sm text-gray-500">
-        👤 {a.auteur}
-      </span>
+  <div key={a._id} className="border p-3 mb-3 rounded">
+
+    {/* contenu */}
+    <p className="mb-2">{a.contenu}</p>
+
+    {/* auteur */}
+    <span className="text-sm text-gray-500">
+      👤 {a.auteur}
+    </span>
+
+    {/* 👍 👎 boutons */}
+    <div className="flex gap-3 mt-3">
+
+      <button
+        onClick={async () => {
+          await axios.put(
+            `http://localhost:3000/api/answer/like/${a._id}`
+          );
+          fetchAnswers(); // refresh
+        }}
+        className="text-green-600"
+      >
+        👍 {a.likes || 0}
+      </button>
+
+      <button
+        onClick={async () => {
+          await axios.put(
+            `http://localhost:3000/api/answer/dislike/${a._id}`
+          );
+          fetchAnswers(); // refresh
+        }}
+        className="text-red-600"
+      >
+        👎 {a.dislikes || 0}
+      </button>
+
     </div>
-  ))}
+  </div>
+))}
 </div>
 
     </div>

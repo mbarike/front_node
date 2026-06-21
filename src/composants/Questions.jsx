@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import QuestionCard from "./QuestionCard";
 import axios from "axios";
 
+
 const Questions = () => {
   const [questions, setQuestions] = useState([]);
+ 
+const [selectedTag, setSelectedTag] = useState("all");
 
   // récupérer les questions depuis le backend
   const fetchQuestions = async () => {
@@ -16,8 +19,20 @@ const Questions = () => {
   };
 
   useEffect(() => {
-    fetchQuestions();
-  }, []);
+  const fetchQuestions = async () => {
+    const res = await axios.get("http://localhost:3000/api/question");
+    setQuestions(res.data.questions);
+  };
+
+  fetchQuestions();
+}, []);
+
+const filteredQuestions =
+  selectedTag === "all"
+    ? questions
+    : questions.filter(
+        (q) => q.categorie === selectedTag
+      );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10">
@@ -35,9 +50,25 @@ const Questions = () => {
           </div>
         </div>
 
+        <div className="flex gap-2 mb-5">
+
+  <button onClick={() => setSelectedTag("all")} className="px-3 py-1 bg-gray-200 rounded">
+    Tous
+  </button>
+
+  <button onClick={() => setSelectedTag("react")} className="px-3 py-1 bg-blue-200 rounded">
+    React
+  </button>
+
+  <button onClick={() => setSelectedTag("node")} className="px-3 py-1 bg-green-200 rounded">
+    Node
+  </button>
+
+</div>
+
         {/* Liste */}
         <div className="grid gap-6">
-          {questions.map((question) => (
+          {filteredQuestions.map((question) => (
             <QuestionCard key={question._id} question={question} />
           ))}
         </div>
