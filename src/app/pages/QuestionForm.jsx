@@ -5,23 +5,25 @@ export default function QuestionForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [auteur, setAuteur] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       await axios.post("http://localhost:3000/api/question", {
-        titre: title,                 // ✅ correspond au backend
-        description: description,
-        categorie: tags,              // ✅ on utilise tags comme catégorie
+        titre: title,
+        description,
+        tags: tags.split(","), // ✅ tableau
+        auteur: auteur,
       });
 
       alert("Question ajoutée !");
 
-      // reset form
       setTitle("");
       setDescription("");
       setTags("");
+      setAuteur("");
 
     } catch (error) {
       console.error(error);
@@ -36,6 +38,15 @@ export default function QuestionForm() {
         className="bg-white shadow-md rounded p-6 w-full max-w-xl"
       >
         <h2 className="text-xl font-bold mb-4">Poser une question</h2>
+
+        {/* Auteur */}
+        <input
+          type="text"
+          placeholder="Ton nom"
+          className="border p-2 w-full mb-3 rounded"
+          value={auteur}
+          onChange={(e) => setAuteur(e.target.value)}
+        />
 
         {/* Titre */}
         <input
@@ -57,13 +68,12 @@ export default function QuestionForm() {
         {/* Tags */}
         <input
           type="text"
-          placeholder="categorie (ex: react,node)"
+          placeholder="tags (ex: react,node)"
           className="border p-2 w-full mb-4 rounded"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
         />
 
-        {/* Bouton */}
         <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">
           Publier
         </button>
