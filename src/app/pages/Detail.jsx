@@ -3,56 +3,68 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
-
 export default function Detail() {
   const { id } = useParams();
+
   const [question, setQuestion] = useState(null);
   const [answers, setAnswers] = useState([]);
-const [contenu, setContenu] = useState("");
-const fetchAnswers = async () => {
-  try {
-    const res = await axios.get(
-      `http://localhost:3000/api/answer/${id}`
-    );
-    setAnswers(res.data.answers);
-  } catch (error) {
-    console.error(error);
-  }
-};
+  const [contenu, setContenu] = useState("");
 
-const handleAnswer = async (e) => {
-  e.preventDefault();
-
-  try {
-    await axios.post("http://localhost:3000/api/answer", {
-      contenu,
-      auteur: "Hawa",
-      questionId: id,
-    });
-
-    setContenu("");
-    fetchAnswers();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
- useEffect(() => {
-  const fetchQuestion = async () => {
+  // 📥 récupérer réponses (CORRIGÉ)
+  const fetchAnswers = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/question/${id}`
+        `http://localhost:3000/api/answer/${id}`
       );
-      setQuestion(res.data.question);
+
+      // 🔥 sécurisé
+      if (Array.isArray(res.data)) {
+        setAnswers(res.data);
+      } else if (Array.isArray(res.data.answers)) {
+        setAnswers(res.data.answers);
+      } else {
+        setAnswers([]);
+      }
+    } catch (error) {
+      console.error(error);
+      setAnswers([]);
+    }
+  };
+
+  // ➕ ajouter réponse
+  const handleAnswer = async (e) => {
+    e.preventDefault();
+
+    try {
+      await axios.post("http://localhost:3000/api/answer", {
+        contenu,
+        auteur: "Hawa",
+        questionId: id,
+      });
+
+      setContenu("");
+      fetchAnswers();
     } catch (error) {
       console.error(error);
     }
   };
 
-  fetchQuestion();
-  fetchAnswers(); // 👈 AJOUT
+  // 📥 charger question + réponses
+  useEffect(() => {
+    const fetchQuestion = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/api/question/${id}`
+        );
+        setQuestion(res.data.question);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-}, [id]);
+    fetchQuestion();
+    fetchAnswers();
+  }, [id]);
 
   if (!question) {
     return <p className="text-center mt-10">Chargement...</p>;
@@ -65,96 +77,128 @@ const handleAnswer = async (e) => {
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded shadow">
 
-      {/* Titre */}
+      {/* QUESTION */}
       <h1 className="text-2xl font-bold mb-4">
         {question.titre}
       </h1>
 
-      {/* Infos */}
       <div className="text-sm text-gray-500 mb-4">
-        <span>👤 {question.auteur || "Anonyme"}</span> •{" "}
-        <span>📅 {date}</span>
+        👤 {question.auteur || "Anonyme"} • 📅 {date}
       </div>
 
-      {/* Description */}
       <div className="prose max-w-none mb-6">
         <ReactMarkdown>
           {question.description}
         </ReactMarkdown>
       </div>
 
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2">
-        {question.tags?.map((tag, i) => (
-          <span
-            key={i}
-            className="bg-blue-100 text-blue-600 px-3 py-1 rounded text-sm"
-          >
-            #{tag}
-          </span>
-        ))}
-      </div>
+      {/* ➕ AJOUT RÉPONSE */}
       <form onSubmit={handleAnswer} className="mt-6">
-  <textarea
-    value={contenu}
-    onChange={(e) => setContenu(e.target.value)}
-    className="border w-full p-2 rounded"
-    placeholder="Ta réponse..."
-  />
+        <textarea
+          value={contenu}
+          onChange={(e) => setContenu(e.target.value)}
+          className="border w-full p-2 rounded"
+          placeholder="Ta réponse..."
+        />
 
-  <button className="bg-blue-500 text-white px-4 py-2 mt-2 rounded">
-    Répondre
-  </button>
-</form>
+        <button className="bg-blue-500 text-white px-4 py-2 mt-2 rounded">
+          Répondre
+        </button>
+      </form>
 
-<div className="mt-6">
-  <h3 className="font-bold mb-2">
-    {answers.length} réponses
-  </h3>
+      {/* 📋 LISTE RÉPONSES */}
+      <div className="mt-6">
+        <h3 className="font-bold mb-2">
+          {answers?.length || 0} réponses
+        </h3>
 
-  {answers.map((a) => (
-  <div key={a._id} className="border p-3 mb-3 rounded">
+        {Array.isArray(answers) &&
+          answers.map((a) => (
+            <div key={a._id} className="border p-3 mb-3 rounded">
 
-    {/* contenu */}
-    <p className="mb-2">{a.contenu}</p>
+              {/* contenu */}
+              <p className="mb-2">{a.contenu}</p>
 
-    {/* auteur */}
-    <span className="text-sm text-gray-500">
-      👤 {a.auteur}
-    </span>
+              {/* auteur */}
+              <span className="text-sm text-gray-500">
+                👤 {a.auteur}
+              </span>
 
-    {/* 👍 👎 boutons */}
-    <div className="flex gap-3 mt-3">
+              {/* 👍 👎 */}
+              <div className="flex gap-3 mt-3">
+                <button
+                  onClick={async () => {
+                    await axios.put(
+                      `http://localhost:3000/api/answer/like/${a._id}`
+                    );
+                    fetchAnswers();
+                  }}
+                  className="text-green-600"
+                >
+                  👍 {a.likes || 0}
+                </button>
 
-      <button
-        onClick={async () => {
-          await axios.put(
-            `http://localhost:3000/api/answer/like/${a._id}`
-          );
-          fetchAnswers(); // refresh
-        }}
-        className="text-green-600"
-      >
-        👍 {a.likes || 0}
-      </button>
+                <button
+                  onClick={async () => {
+                    await axios.put(
+                      `http://localhost:3000/api/answer/dislike/${a._id}`
+                    );
+                    fetchAnswers();
+                  }}
+                  className="text-red-600"
+                >
+                  👎 {a.dislikes || 0}
+                </button>
+              </div>
 
-      <button
-        onClick={async () => {
-          await axios.put(
-            `http://localhost:3000/api/answer/dislike/${a._id}`
-          );
-          fetchAnswers(); // refresh
-        }}
-        className="text-red-600"
-      >
-        👎 {a.dislikes || 0}
-      </button>
+              {/* 💬 COMMENTAIRES */}
+              <div className="mt-3">
+                <h4 className="font-semibold">Commentaires :</h4>
 
-    </div>
-  </div>
-))}
-</div>
+                {a.comments?.map((c, i) => (
+                  <p key={i} className="text-sm">
+                    <b>{c.auteur}</b> : {c.contenu}
+                  </p>
+                ))}
+              </div>
 
+              {/* ✍️ AJOUT COMMENTAIRE */}
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+
+                  const text = e.target.comment.value;
+
+                  if (!text) return;
+
+                  await axios.post(
+                    `http://localhost:3000/api/answer/comment/${a._id}`,
+                    {
+                      contenu: text,
+                      auteur: "Hawa",
+                    }
+                  );
+
+                  e.target.reset();
+                  fetchAnswers();
+                }}
+                className="mt-2 flex gap-2"
+              >
+                <input
+                  type="text"
+                  name="comment"
+                  placeholder="Ajouter un commentaire..."
+                  className="border p-1 flex-1"
+                />
+
+                <button className="text-blue-500">
+                  Envoyer
+                </button>
+              </form>
+
+            </div>
+          ))}
+      </div>
     </div>
   );
 }

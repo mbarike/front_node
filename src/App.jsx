@@ -8,7 +8,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Profil from './app/pages/Profil';
 import Detail from './app/pages/Detail';
 import QuestionForm from './app/pages/QuestionForm';
-
+import { useNavigate } from "react-router-dom";
 
 const App = () => {
 
@@ -32,6 +32,7 @@ const App = () => {
                //{path:'/detail:id' , element:<Detail/>},
               // {path:'/messages' , element:<Message/>},
               { path: '/question/:id', element: <Detail /> },
+              
 
         ]
         }
